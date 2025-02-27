@@ -1,15 +1,26 @@
 #!/usr/bin/env bash
 
-OUTPUT_DIR="/tmp/s3-bash-scripts"
+#exit immediatly if any command return error
+set -e
 
-mkdir -p $OUTPUT_DIR
+#check for bucket name
+if [ -z "$1" ]; then
+  echo "There is needs to be a bucket name."
+  exit 1
+fi
 
-NUM_FILES=$((RANDOM%6+5))
+#check for file name and prefix
+if [ -z "$2" ]; then
+  echo "There is needs to be a file name and prefix."
+  exit 1
+fi
 
-for((i=1; i<=$NUM_FILES; i++)); do
-    
-    FILE_NAME="$OUTPUT_DIR/file_$i.txt"
+BUCKET_NAME=$1
+FILENAME=$2
 
-    dd if=/dev/urandom of="$FILE_NAME" bs=1024 count=$((RANDOM % 1024 + 1)) 2>/dev/null
+OBJECT_KEY=$(basename $FILENAME)
 
-    done
+aws s3api put-object \
+--bucket $BUCKET_NAME \
+--body $FILENAME \
+--key $OBJECT_KEY
